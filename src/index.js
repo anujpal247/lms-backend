@@ -4,7 +4,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import morgan from "morgan";
 
-import { ServerConfig } from "./config/index.js";
+import { ServerConfig, DatabaseConfig } from "./config/index.js";
 import { errorResponse } from "./utils/common/index.js";
 import apiRoutes from "./routes/index.js";
 
@@ -24,6 +24,15 @@ app.all("*", (req, res) => {
   res.status(StatusCodes.NOT_FOUND).json(errorResponse);
 });
 
-app.listen(ServerConfig.PORT, () => {
-  console.log(`Server is runnig on port ${ServerConfig.PORT}`);
-});
+
+DatabaseConfig.connectDB()
+  .then((response) => {
+    app.listen(ServerConfig.PORT, () => {
+      console.log(`Database connected at host: ${response}`);
+      console.log(`Server is runnig on port ${ServerConfig.PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.log(`Database connection failed: `, error);
+    process.exit(1);
+  });
